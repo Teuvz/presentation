@@ -55,8 +55,8 @@ class AnimatedObject extends GameObject
 		
 		if ( animationTimer != null )
 		{
-			animationTimer = null;
 			animationTimer.removeEventListener( TimerEvent.TIMER, animationLoop );
+			animationTimer = null;
 		}
 			
 		currentAnimation = name;
@@ -93,14 +93,14 @@ class AnimatedObject extends GameObject
 	private function animationLoop( e:Event=null )
 	{		
 		this.graphics.clear();
-				
+					
 		var tempBmd:BitmapData = new BitmapData(currentAnimationWidth, currentAnimationHeight, true );
 		tempBmd.copyPixels(bmd, new Rectangle(currentAnimationX + (currentFrame*currentAnimationWidth), currentAnimationY, currentAnimationWidth, currentAnimationHeight), new Point(0, 0) );
 		
 		this.graphics.beginBitmapFill(tempBmd);
 		this.graphics.drawRect(0, 0, currentAnimationWidth, currentAnimationHeight);
 		this.graphics.endFill();
-		
+				
 		if ( currentFrame+1 < currentAnimationLength )
 			currentFrame++;
 		else
