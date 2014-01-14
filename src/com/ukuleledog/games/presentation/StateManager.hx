@@ -1,5 +1,6 @@
 package com.ukuleledog.games.presentation;
 
+import com.ukuleledog.games.presentation.states.CodecState;
 import com.ukuleledog.games.presentation.states.MapState;
 import com.ukuleledog.games.presentation.states.MarioState;
 import com.ukuleledog.games.presentation.states.SplashState;
@@ -34,11 +35,8 @@ class StateManager extends Sprite
 	private function init( e:Event )
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
-		
-		this.scaleX = 2;
-		this.scaleY = 2;
-		
-		currentState = new MarioState();
+				
+		currentState = new CodecState();
 		currentState.addEventListener(Event.COMPLETE, mapHandle);
 		addChild(currentState);
 	}
@@ -72,6 +70,17 @@ class StateManager extends Sprite
 		currentState = null;
 		
 		trace("FF6");
+	}
+	
+	private function codecHandle( e:Event )
+	{
+		currentState.removeEventListener(Event.COMPLETE, codecHandle);
+		removeChild(currentState);
+		currentState = null;
+		
+		currentState = new CodecState();
+		currentState.addEventListener(Event.COMPLETE, ff6Handle);
+		addChild(currentState);
 	}
 	
 }

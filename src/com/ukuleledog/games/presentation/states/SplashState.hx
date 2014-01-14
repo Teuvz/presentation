@@ -55,6 +55,8 @@ class SplashState extends State
 		
 		Actuate.tween (curtain, 5, { y: -170 } );
 		
+		this.scaleX = 2;
+		this.scaleY = 2;
 	}
 	
 	private function keyDownHandle( e:KeyboardEvent )

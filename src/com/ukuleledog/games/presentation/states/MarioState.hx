@@ -71,6 +71,9 @@ class MarioState extends State
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		stage.addEventListener( KeyboardEvent.KEY_UP, keyUpHandle );
 		addEventListener( Event.ENTER_FRAME, loop );
+		
+		this.scaleX = 2;
+		this.scaleY = 2;
 	}
 	
 	private function initWorld()

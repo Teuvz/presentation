@@ -91,6 +91,9 @@ class MapState extends State
 		closingMask.y = 112;
 		
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		
+		this.scaleX = 2;
+		this.scaleY = 2;
 	}
 	
 	private function close()
