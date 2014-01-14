@@ -29,19 +29,20 @@ class MarioState extends State
 	private static var PHYSICS_SCALE:Float = 1 / 30;
 	
 	private var physicsDebug:Sprite;
-	private var world:B2World;
+	public static var world:B2World;
 	
 	private var keyPressed:Bool = false;
 	private var pressedKey:UInt = 0;
+	private var inputKeys:Map<Int, Bool>;
 	
 	private var level:Sprite;
 	
 	private var mario:Mario;
-	private var marioBody:B2Body;
 	
 	public function new() 
 	{
 		super();
+		inputKeys = new Map();
 		
 		addEventListener( Event.ADDED_TO_STAGE, init );
 	}
@@ -58,14 +59,14 @@ class MarioState extends State
 		level.addChild( new Bitmap(backgroundData) );
 		addChild(level);
 			
+		initWorld();
+		
 		mario = new Mario();
 		mario.x = 10;
 		mario.y = 410;
 		level.addChild(mario);
 		
 		//musicChannel = Assets.getMusic("music/mario.mp3").play();
-		
-		initWorld();
 			
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		stage.addEventListener( KeyboardEvent.KEY_UP, keyUpHandle );
@@ -86,8 +87,7 @@ class MarioState extends State
 		world.setDebugDraw (debugDraw);
 		
 		createBox (0, 422, 4000, 10, false);
-		//createBox (20, 100, 10, 10, true);
-		marioBody = createBox (mario.x, mario.y, mario.width, mario.height, true);
+		createBox (0, 100, 10, 10, true);
 	}
 		
 	private function createBox (x:Float, y:Float, width:Float, height:Float, dynamicBody:Bool):B2Body {
@@ -105,55 +105,53 @@ class MarioState extends State
 		var fixtureDefinition = new B2FixtureDef ();
 		fixtureDefinition.shape = polygon;
 		
-		var body = world.createBody (bodyDefinition);
+		var body = MarioState.world.createBody (bodyDefinition);
 		body.createFixture (fixtureDefinition);
 		
 		return body;
 	}
 	
 	private function keyDownHandle( e:KeyboardEvent )
-	{
-		keyPressed = true;
-		pressedKey = e.keyCode;
+	{		
+		inputKeys.set( e.keyCode, true );
 	}
 	
 	private function keyUpHandle( e:KeyboardEvent )
-	{
-		keyPressed = false;
+	{		
+		inputKeys.set( e.keyCode, false );
 	}
 	
 	private function loop( e:Event )
 	{	
 		
-		if ( keyPressed )
+		var moving:Bool = false;
+		
+		if ( inputKeys.get(Keyboard.RIGHT) == true )
 		{
-			switch(pressedKey)
-			{
-				case Keyboard.RIGHT:
-					marioBody.setLinearVelocity( new B2Vec2(10, 0) );
-					mario.moveRight();
-				case Keyboard.LEFT:
-					marioBody.setLinearVelocity( new B2Vec2(-10, 0) );
-					mario.moveLeft();
-				case Keyboard.SPACE:
-					if ( !mario.jumping ) {
-						marioBody.applyImpulse( new B2Vec2(0, -2), marioBody.getWorldCenter() );
-						mario.jump();
-					}
-			}
-		} else {
-						
-			marioBody.setLinearVelocity( new B2Vec2(0,0) );
-			mario.stopMove();
+			mario.moveRight();
+			moving = true;
 		}
 		
-		mario.x = (marioBody.getPosition().x / PHYSICS_SCALE) - (mario.width / 2);
-		mario.y = (marioBody.getPosition().y / PHYSICS_SCALE) - (mario.height / 2);
+		if ( inputKeys.get(Keyboard.LEFT) == true )
+		{
+			mario.moveLeft();
+			moving = true;
+		}
+			
+		if ( inputKeys.get(Keyboard.SPACE) == true )
+		{
+			mario.jump();
+			moving = true;
+		}
+		
+		if ( !moving )
+			mario.stopMove();
+		
 		moveCamera();
 		
 		world.step (1 / 30, 10, 10);
 		world.clearForces();
-		//world.drawDebugData();
+		world.drawDebugData();
 	}
 	
 	private function moveCamera()

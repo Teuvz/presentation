@@ -6,6 +6,7 @@ import com.ukuleledog.games.presentation.core.PhysicsObject;
 import flash.display.Bitmap;
 import openfl.Assets;
 import flash.events.Event;
+import box2D.common.math.B2Vec2;
 
 /**
  * ...
@@ -15,7 +16,7 @@ class Mario extends PhysicsObject
 {
 
 	private var status:String = 'small';
-	private var speed:UInt = 3;
+	private var speed:UInt = 10;
 	
 	public var jumping:Bool = false;
 	public var movingRight:Bool = false;
@@ -24,6 +25,7 @@ class Mario extends PhysicsObject
 	public function new() 
 	{
 		super();
+		this.dynamicBody = true;
 		this.bmd = Assets.getBitmapData("img/mario-sprite.png",true);
 		addEventListener( Event.ADDED_TO_STAGE, init );
 	}
@@ -36,6 +38,8 @@ class Mario extends PhysicsObject
 		createAnimation('small-crouch', 0, 0, 1, 16, 16);
 		animate('small-idle');
 		
+		initPhysics();
+		
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 	}
 	
@@ -46,6 +50,8 @@ class Mario extends PhysicsObject
 		movingRight = false;
 		movingLeft = false;
 		jumping = false;
+		
+		body.setLinearVelocity( new B2Vec2(0, body.getLinearVelocity().y ) );
 	}
 	
 	public function moveRight()
@@ -57,6 +63,8 @@ class Mario extends PhysicsObject
 		setAnimation( status + '-walk' );
 		
 		movingRight = true;
+		
+		body.applyForce( new B2Vec2(speed,0), body.getWorldCenter()  );
 	}
 	
 	public function moveLeft()
@@ -68,12 +76,19 @@ class Mario extends PhysicsObject
 		setAnimation( status + '-walk' );
 		
 		movingLeft = true;
+		
+		body.applyForce( new B2Vec2(-speed,0), body.getWorldCenter()  );
 	}
 	
 	public function jump()
 	{
-		setAnimation( status + '-jump' );
-		jumping = true;
+		if ( body.getLinearVelocity().y == 0 )
+		{
+			setAnimation( status + '-jump' );
+			jumping = true;
+			
+			body.applyImpulse( new B2Vec2(0, -5), body.getWorldCenter()  );
+		}
 	}
 	
 }

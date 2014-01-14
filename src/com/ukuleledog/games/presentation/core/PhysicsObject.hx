@@ -6,6 +6,7 @@ import box2D.dynamics.B2BodyDef;
 import box2D.dynamics.B2FixtureDef;
 import box2D.dynamics.B2World;
 import flash.events.Event;
+import com.ukuleledog.games.presentation.states.MarioState;
 
 /**
  * ...
@@ -14,7 +15,8 @@ import flash.events.Event;
 class PhysicsObject extends AnimatedObject
 {
 
-	private var body:B2Body;
+	private static var PHYSICS_SCALE:Float = 1 / 30;
+	public var body:B2Body;
 	public var dynamicBody:Bool = true;
 	
 	public function new() 
@@ -22,29 +24,31 @@ class PhysicsObject extends AnimatedObject
 		super();
 	}
 	
-	public function getBody() : B2Body
+	public function initPhysics()
 	{
-		return body;
-	}
-	
-	public function setBody( body:B2Body )
-	{
-		if ( this.body == null )
-		{
-			this.body = body;
-			addEventListener( Event.ENTER_FRAME, physicsLoop );
+		var bodyDefinition = new B2BodyDef();
+		bodyDefinition.position.set (x * PHYSICS_SCALE, y * PHYSICS_SCALE);
+		
+		if (dynamicBody) {
+			bodyDefinition.type = B2Body.b2_dynamicBody;			
 		}
-		else
-		{
-			this.body = body;
-		}
+		
+		var polygon = new B2PolygonShape ();
+		polygon.setAsBox ((width / 2) * PHYSICS_SCALE, (height / 2) * PHYSICS_SCALE);
+		
+		var fixtureDefinition = new B2FixtureDef ();
+		fixtureDefinition.shape = polygon;
+		
+		body = MarioState.world.createBody (bodyDefinition);
+		body.createFixture (fixtureDefinition);
+		
+		addEventListener( Event.ENTER_FRAME, physicsLoop );
 	}
-	
+		
 	private function physicsLoop( e:Event )
 	{
-		var vec:B2Vec2 = body.getPosition();
-		this.x = vec.x;
-		this.y = vec.y;
+		this.x = (body.getPosition().x / PHYSICS_SCALE) - (width / 2);
+		this.y = (body.getPosition().y / PHYSICS_SCALE) - (height / 2);
 	}
 	
 }
