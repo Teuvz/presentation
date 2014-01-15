@@ -30,7 +30,10 @@ import openfl.Assets;
  */
 class CodecState extends State
 {
-		
+	
+	private var soundChannel:SoundChannel;
+	private var startTimer:Timer;
+	
 	private var background:Sprite;
 	
 	private var meiLing:MeiLing;
@@ -59,10 +62,9 @@ class CodecState extends State
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 		
-		Assets.getSound("snd/codec.mp3").play();
-		
-		musicChannel = Assets.getMusic("music/codec.mp3").play();
-		
+		soundChannel = Assets.getSound("snd/codec.mp3").play();
+		soundChannel.addEventListener( Event.SOUND_COMPLETE, codecOpen );
+				
 		var tempData:BitmapData = Assets.getBitmapData("img/codec-sprite.png", true);
 		
 		var tempBackground = new BitmapData(640, 480, false);
@@ -72,6 +74,7 @@ class CodecState extends State
 		background.width = 512;
 		background.height = 384;
 		background.y = 32;
+		background.alpha = 0;
 		addChild( background );
 		
 		textFormat = new TextFormat("arial", 20, 0xFFFFFF);
@@ -92,19 +95,52 @@ class CodecState extends State
 		meiLing.y = 56;
 		meiLing.scaleX = 2.1;
 		meiLing.scaleY = 2.1;
-		background.addChild( meiLing );
-		meiLing.setAnimation('talk');
+		meiLing.alpha = 0;
+		background.addChild( meiLing );		
 		
 		snake = new Snake();
 		snake.y = 59;
 		snake.x = 475;
 		snake.scaleX = 2.1;
 		snake.scaleY = 2.1;
+		snake.alpha = 0;
 		background.addChild( snake );
+
+	}
+	
+	private function codecOpen( e:Event )
+	{
+		soundChannel.removeEventListener( Event.SOUND_COMPLETE, codecOpen );
+		soundChannel = Assets.getSound("snd/codecopen.wav").play();
+		soundChannel.addEventListener( Event.SOUND_COMPLETE, start );
 		
+		Actuate.tween( background, 0.5, {alpha: 1} );
+	}
+	
+	private function start(e:Event)
+	{
+		soundChannel.removeEventListener( Event.SOUND_COMPLETE, start );
+		
+		musicChannel = Assets.getMusic("music/codec.mp3").play();
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		
-		displayText("Hello Snake! Do you want to save?");
+		Actuate.tween( meiLing, 1, {alpha: 1} );
+		Actuate.tween( snake, 1, {alpha: 1} );
+		
+		startTimer = new Timer(2000);
+		startTimer.addEventListener( TimerEvent.TIMER, displayFirstText );
+		startTimer.start();
+		
+	}
+	
+	private function displayFirstText( e:TimerEvent )
+	{
+		startTimer.removeEventListener( TimerEvent.TIMER, displayFirstText );
+		startTimer.stop();
+		startTimer = null;
+		
+		meiLing.setAnimation('talk');
+		displayText("You called, Snake?");
 	}
 	
 	private function displayText( str:String )
@@ -194,15 +230,17 @@ class CodecState extends State
 					displayText("Mei Ling, why are you telling me all this?");
 					step = 7;
 				case 7:
+					snake.setAnimation('angry');
 					displayText("I don't care about having another geek friend, I already have Hideo and Otacon.");
 					step = 8;
 				case 8:
-					snake.setAnimation('idle');
+					snake.setAnimation('angry-idle');
 					meiLing.setAnimation('wink');
 					displayText("Sorry Snake... I kind of have a crush on this guy and can't stop talking about him.");
 					step = 9;
 				case 9:
 					meiLing.setAnimation('talk');
+					snake.setAnimation('idle');
 					displayText("Oh look! Here he comes!");
 					trace("mario animation");
 					step = 10;
