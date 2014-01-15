@@ -20,9 +20,9 @@ class MeiLing extends AnimatedObject
 	
 	private function init( e:Event )
 	{
-		createAnimation('idle', 0, 480, 5, 88, 56, 0.2);
-		createAnimation('talk', 0, 568, 2, 88, 56, 0.2);
-		createAnimation('wink', 112, 568, 1, 88, 56, 0.2);
+		createAnimation('idle', 0, 480, 3, 87, 50, 0.2);
+		createAnimation('talk', 0, 568, 2, 87, 50, 0.2);
+		createAnimation('wink', 100, 568, 1, 87, 50);
 		animate();
 		
 		removeEventListener( Event.ADDED_TO_STAGE, init );

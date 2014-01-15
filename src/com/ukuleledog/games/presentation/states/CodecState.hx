@@ -59,6 +59,8 @@ class CodecState extends State
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 		
+		Assets.getSound("snd/codec.mp3").play();
+		
 		musicChannel = Assets.getMusic("music/codec.mp3").play();
 		
 		var tempData:BitmapData = Assets.getBitmapData("img/codec-sprite.png", true);
@@ -153,10 +155,12 @@ class CodecState extends State
 				displaySave();
 			} else if ( cursorPosition == 1 && e.keyCode == Keyboard.SPACE )
 			{
+				meiLing.setAnimation('talk');
 				displayText("Are you sure?");
 				displayingSave = false;
 			} else if ( cursorPosition == 0 && e.keyCode == Keyboard.SPACE )
 			{
+				meiLing.setAnimation('talk');
 				displayText("Your progress was saved.");
 				displayingSave = false;
 				step = 1;
@@ -166,8 +170,10 @@ class CodecState extends State
 		{
 			switch (step){
 				case 0:
+					meiLing.setAnimation('idle');
 					displaySave();
 				case 1:
+					meiLing.setAnimation('talk');
 					displayText("Snake, have you ever heard about Matthew Charlton?");
 					step = 2;
 				case 2:
@@ -184,12 +190,14 @@ class CodecState extends State
 					step = 6;
 				case 6:
 					meiLing.setAnimation('idle');
+					snake.setAnimation('talk');
 					displayText("Mei Ling, why are you telling me all this?");
 					step = 7;
 				case 7:
 					displayText("I don't care about having another geek friend, I already have Hideo and Otacon.");
 					step = 8;
 				case 8:
+					snake.setAnimation('idle');
 					meiLing.setAnimation('wink');
 					displayText("Sorry Snake... I kind of have a crush on this guy and can't stop talking about him.");
 					step = 9;
@@ -205,7 +213,6 @@ class CodecState extends State
 	
 	private function displaySave()
 	{
-		
 		displayingSave = true;
 		
 		var textFormat:TextFormat = new TextFormat("arial", 20, 0x21CF80);
