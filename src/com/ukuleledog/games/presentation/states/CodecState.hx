@@ -1,8 +1,11 @@
 package com.ukuleledog.games.presentation.states;
+import com.ukuleledog.games.presentation.core.AnimatedObject;
 import com.ukuleledog.games.presentation.elements.Cactus;
 import com.ukuleledog.games.presentation.elements.Hammer;
 import com.ukuleledog.games.presentation.elements.HelpCry;
 import com.ukuleledog.games.presentation.elements.MapMario;
+import com.ukuleledog.games.presentation.elements.MeiLing;
+import com.ukuleledog.games.presentation.elements.Snake;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.Sprite;
@@ -29,6 +32,9 @@ class CodecState extends State
 {
 		
 	private var background:Sprite;
+	
+	private var meiLing:MeiLing;
+	private var snake:Snake;
 	
 	private var textField:TextField;
 	private var textFormat:TextFormat;	
@@ -79,6 +85,21 @@ class CodecState extends State
 		textField.backgroundColor = 0x000000;
 		addChild( textField );
 		
+		meiLing = new MeiLing();
+		meiLing.x = 62;
+		meiLing.y = 56;
+		meiLing.scaleX = 2.1;
+		meiLing.scaleY = 2.1;
+		background.addChild( meiLing );
+		meiLing.setAnimation('talk');
+		
+		snake = new Snake();
+		snake.y = 59;
+		snake.x = 475;
+		snake.scaleX = 2.1;
+		snake.scaleY = 2.1;
+		background.addChild( snake );
+		
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		
 		displayText("Hello Snake! Do you want to save?");
@@ -90,7 +111,7 @@ class CodecState extends State
 		displayingText = true;
 		textToDisplay = str;
 		latestChar = 0;
-		textTimer = new Timer(100);
+		textTimer = new Timer(50);
 		textTimer.addEventListener( TimerEvent.TIMER, displayChar );
 		textTimer.start();
 	}
@@ -162,15 +183,18 @@ class CodecState extends State
 					displayText("He's also not only co-writter but a recuring character in the online comic 'Hola Tavernier!'");
 					step = 6;
 				case 6:
+					meiLing.setAnimation('idle');
 					displayText("Mei Ling, why are you telling me all this?");
 					step = 7;
 				case 7:
 					displayText("I don't care about having another geek friend, I already have Hideo and Otacon.");
 					step = 8;
 				case 8:
+					meiLing.setAnimation('wink');
 					displayText("Sorry Snake... I kind of have a crush on this guy and can't stop talking about him.");
 					step = 9;
 				case 9:
+					meiLing.setAnimation('talk');
 					displayText("Oh look! Here he comes!");
 					trace("mario animation");
 					step = 10;
