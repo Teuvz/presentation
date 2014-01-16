@@ -1,6 +1,7 @@
 package com.ukuleledog.games.presentation;
 
 import com.ukuleledog.games.presentation.states.CodecState;
+import com.ukuleledog.games.presentation.states.FightState;
 import com.ukuleledog.games.presentation.states.MapState;
 import com.ukuleledog.games.presentation.states.MarioState;
 import com.ukuleledog.games.presentation.states.SplashState;
@@ -36,7 +37,7 @@ class StateManager extends Sprite
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 				
-		currentState = new SplashState();
+		currentState = new FightState();
 		currentState.addEventListener(Event.COMPLETE, mapHandle);
 		addChild(currentState);
 	}

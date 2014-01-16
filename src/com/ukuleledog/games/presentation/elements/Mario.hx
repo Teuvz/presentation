@@ -36,9 +36,15 @@ class Mario extends PhysicsObject
 		createAnimation('small-walk', 0, 0, 2, 16, 16, 0.1);
 		createAnimation('small-jump', 16, 0, 1, 16, 16);
 		createAnimation('small-crouch', 0, 0, 1, 16, 16);
+		
+		createAnimation('super-idle', 0, 21, 1, 27, 16);
+		createAnimation('super-walk', 0, 21, 3, 27, 16, 0.1);
+		createAnimation('super-jump', 48, 21, 1, 27, 16);
+		createAnimation('super-crouch', 64, 21, 1, 27, 16);
+		
 		animate('small-idle');
 		
-		initPhysics();
+		//initPhysics();
 		
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 	}
