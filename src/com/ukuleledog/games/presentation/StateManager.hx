@@ -37,7 +37,7 @@ class StateManager extends Sprite
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 				
-		currentState = new FightState();
+		currentState = new SplashState();
 		currentState.addEventListener(Event.COMPLETE, mapHandle);
 		addChild(currentState);
 	}
@@ -49,7 +49,7 @@ class StateManager extends Sprite
 		currentState = null;
 		
 		currentState = new MapState();
-		currentState.addEventListener(Event.COMPLETE, codecHandle);
+		currentState.addEventListener(Event.COMPLETE, ff6Handle);
 		addChild(currentState);
 	}
 	
@@ -70,7 +70,9 @@ class StateManager extends Sprite
 		removeChild(currentState);
 		currentState = null;
 		
-		trace("FF6");
+		currentState = new FightState();
+		currentState.addEventListener(Event.COMPLETE, codecHandle);
+		addChild(currentState);
 	}
 	
 	private function codecHandle( e:Event )
@@ -80,8 +82,17 @@ class StateManager extends Sprite
 		currentState = null;
 		
 		currentState = new CodecState();
-		currentState.addEventListener(Event.COMPLETE, ff6Handle);
+		currentState.addEventListener(Event.COMPLETE, personaHandle);
 		addChild(currentState);
+	}
+	
+	private function personaHandle( e:Event )
+	{
+		currentState.removeEventListener(Event.COMPLETE, personaHandle);
+		removeChild(currentState);
+		currentState = null;
+		
+		trace("persona");
 	}
 	
 }

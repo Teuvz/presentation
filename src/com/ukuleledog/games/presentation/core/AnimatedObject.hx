@@ -17,6 +17,8 @@ import openfl.Assets;
 class AnimatedObject extends GameObject
 {
 
+	private var looping:Bool = true;
+	
 	private var animationTimer:Timer;
 	private var currentAnimation:String;
 	private var currentFrame:UInt = 0;
@@ -75,14 +77,16 @@ class AnimatedObject extends GameObject
 		animationLoop();
 	}
 	
-	public function createAnimation( name:String, startX:UInt, startY:UInt,  length:UInt, height:UInt, width: UInt, speed:Float = 1 )
+	public function createAnimation( name:String, startX:UInt, startY:UInt,  length:UInt, height:UInt, width: UInt, speed:Float = 1, looping:Bool = true )
 	{
 		animationLengths.set(name, length);
 		animationHeights.set(name, height);
 		animationWidths.set(name, width);
 		animationPositionsX.set(name, startX);
 		animationPositionsY.set(name, startY);
-		animationSpeeds.set(name, speed*1000);
+		animationSpeeds.set(name, speed * 1000);
+		
+		this.looping = looping;
 	}
 	
 	public function animate( name:String = 'idle' )
@@ -103,7 +107,7 @@ class AnimatedObject extends GameObject
 				
 		if ( currentFrame+1 < currentAnimationLength )
 			currentFrame++;
-		else
+		else if ( looping )
 			currentFrame = 0;
 	}
 		

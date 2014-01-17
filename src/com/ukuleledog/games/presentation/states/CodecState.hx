@@ -4,6 +4,7 @@ import com.ukuleledog.games.presentation.elements.Cactus;
 import com.ukuleledog.games.presentation.elements.Hammer;
 import com.ukuleledog.games.presentation.elements.HelpCry;
 import com.ukuleledog.games.presentation.elements.MapMario;
+import com.ukuleledog.games.presentation.elements.Mario;
 import com.ukuleledog.games.presentation.elements.MeiLing;
 import com.ukuleledog.games.presentation.elements.Snake;
 import flash.display.Bitmap;
@@ -241,11 +242,49 @@ class CodecState extends State
 				case 9:
 					meiLing.setAnimation('talk');
 					snake.setAnimation('idle');
-					displayText("Oh look! Here he comes!");
-					trace("mario animation");
+					displayText("Oh look! Here he is!");
+					marioAnimation();
 					step = 10;
 			}
 		}
+		
+	}
+	
+	private function marioAnimation()
+	{
+		
+		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		meiLing.setAnimation('idle');
+		
+		var tempData:BitmapData = Assets.getBitmapData("img/ff6-sprite.png", true);
+		var tempOctoData:BitmapData = new BitmapData(64, 47, true);
+		tempOctoData.copyPixels( tempData, new Rectangle(0, 195, 64, 47), new Point(0, 0) );
+		var octo:Bitmap = new Bitmap(tempOctoData);
+		octo.y = 300;
+		octo.x = -130;
+		octo.scaleX = 2;
+		octo.scaleY = 2;
+		addChild(octo);
+		
+		var mario:Mario = new Mario();
+		mario.y = 300;
+		mario.x = -30;
+		mario.scaleX = 2;
+		mario.scaleY = 2;
+		addChild(mario);
+		mario.setAnimation('super-walk');
+		
+		Actuate.tween(mario, 8, { x:720 } );
+		Actuate.tween(octo, 8, { x:570 } ).onComplete(function() {
+			Actuate.tween(textField, 0.2, { alpha:0 } );
+			Actuate.tween(meiLing, 1, { alpha:0 } );
+			Actuate.tween(snake, 1, { alpha:0 } ).onComplete(function() {
+				Actuate.tween( background, 1, { alpha:0 } ).onComplete(function(){
+					musicChannel.stop();
+					dispatchEvent(new Event(Event.COMPLETE));
+				});
+			});
+		});
 		
 	}
 	
