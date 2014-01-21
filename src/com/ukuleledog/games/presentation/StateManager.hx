@@ -37,7 +37,7 @@ class StateManager extends Sprite
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 				
-		currentState = new SplashState();
+		currentState = new MarioState();
 		currentState.addEventListener(Event.COMPLETE, mapHandle);
 		addChild(currentState);
 	}
@@ -49,7 +49,7 @@ class StateManager extends Sprite
 		currentState = null;
 		
 		currentState = new MapState();
-		currentState.addEventListener(Event.COMPLETE, ff6Handle);
+		currentState.addEventListener(Event.COMPLETE, marioHandle);
 		addChild(currentState);
 	}
 	

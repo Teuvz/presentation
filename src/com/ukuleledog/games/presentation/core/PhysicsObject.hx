@@ -24,7 +24,7 @@ class PhysicsObject extends AnimatedObject
 		super();
 	}
 	
-	public function initPhysics()
+	public function initPhysics(name:String = 'GameObject')
 	{
 		var bodyDefinition = new B2BodyDef();
 		bodyDefinition.position.set (x * PHYSICS_SCALE, y * PHYSICS_SCALE);
@@ -38,6 +38,7 @@ class PhysicsObject extends AnimatedObject
 		
 		var fixtureDefinition = new B2FixtureDef ();
 		fixtureDefinition.shape = polygon;
+		fixtureDefinition.userData = name;
 		
 		body = MarioState.world.createBody (bodyDefinition);
 		body.createFixture (fixtureDefinition);

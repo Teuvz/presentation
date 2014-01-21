@@ -4,8 +4,11 @@ import flash.events.Event;
 import flash.events.KeyboardEvent;
 import com.ukuleledog.games.presentation.elements.SplashThree;
 import flash.display.Bitmap;
+import flash.events.TimerEvent;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import flash.ui.Keyboard;
+import flash.utils.Timer;
 import motion.Actuate;
 import openfl.Assets;
 
@@ -19,6 +22,7 @@ class SplashState extends State
 	private var background:Bitmap;
 	private var curtain:Bitmap;
 	private var three:SplashThree;
+	private var pressSpace:Bitmap;
 	
 	public function new() 
 	{
@@ -53,14 +57,36 @@ class SplashState extends State
 		//curtain.y = 35;
 		addChild(curtain);
 		
+		var spaceData:BitmapData = new BitmapData(84, 8, true);
+		spaceData.copyPixels(tempData, new Rectangle(0, 265, 84, 8), new Point(0, 0) );
+		pressSpace = new Bitmap( spaceData );
+		pressSpace.x = 90;
+		pressSpace.y = 160;
+		pressSpace.alpha = 1;
+		addChild( pressSpace );
+		
+		spaceHandle();
+				
 		Actuate.tween (curtain, 5, { y: -170 } );
 		
 		this.scaleX = 2;
 		this.scaleY = 2;
 	}
 	
+	private function spaceHandle()
+	{
+		if ( pressSpace.alpha == 0 )
+		Actuate.tween(pressSpace, 2, { alpha:1 } ).onComplete(spaceHandle);
+		else
+		Actuate.tween(pressSpace, 2, { alpha:0 } ).onComplete(spaceHandle);
+	}
+	
 	private function keyDownHandle( e:KeyboardEvent )
 	{
+		
+		if ( e.keyCode != Keyboard.SPACE )
+		return;
+		
 		stage.removeEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		
 		removeChild(curtain);

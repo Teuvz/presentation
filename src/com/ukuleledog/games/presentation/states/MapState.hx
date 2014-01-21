@@ -141,6 +141,7 @@ class MapState extends State
 	
 	private function keyDownHandle( e:KeyboardEvent )
 	{
+		
 		if ( e.keyCode == Keyboard.RIGHT && position == 0 )
 		{
 			Actuate.tween(mario, 1, { x: 63 } );
@@ -164,6 +165,9 @@ class MapState extends State
 		} else if ( e.keyCode == Keyboard.SPACE && position == 2 ) {
 			stage.removeEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 			close();
+		} else if ( e.keyCode == Keyboard.UP || e.keyCode == Keyboard.DOWN || e.keyCode == Keyboard.RIGHT || e.keyCode == Keyboard.LEFT )
+		{
+			Assets.getSound("snd/smb3_bump.wav",true).play();
 		}
 	}
 		

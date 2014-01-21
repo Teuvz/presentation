@@ -94,6 +94,8 @@ class Mario extends PhysicsObject
 			jumping = true;
 			
 			body.applyImpulse( new B2Vec2(0, -5), body.getWorldCenter()  );
+			
+			Assets.getSound("snd/smb3_jump.wav", true).play();
 		}
 	}
 	

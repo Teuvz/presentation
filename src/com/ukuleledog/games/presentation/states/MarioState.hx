@@ -7,6 +7,7 @@ import box2D.dynamics.B2FixtureDef;
 import box2D.dynamics.B2World;
 import box2D.dynamics.B2Body;
 import com.ukuleledog.games.presentation.core.PhysicsObject;
+import com.ukuleledog.games.presentation.elements.ItemBox;
 import com.ukuleledog.games.presentation.elements.Mario;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
@@ -38,6 +39,7 @@ class MarioState extends State
 	private var level:Sprite;
 	
 	private var mario:Mario;
+	private var itemBox:ItemBox;
 	
 	public function new() 
 	{
@@ -62,11 +64,17 @@ class MarioState extends State
 		initWorld();
 		
 		mario = new Mario();
-		mario.x = 10;
+		mario.x = 100;
 		mario.y = 410;
 		level.addChild(mario);
+		mario.initPhysics();
 		
 		//musicChannel = Assets.getMusic("music/mario.mp3").play();
+		
+		itemBox = new ItemBox();
+		itemBox.x = 185;
+		itemBox.y = 361;
+		level.addChild(itemBox);
 			
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		stage.addEventListener( KeyboardEvent.KEY_UP, keyUpHandle );
@@ -89,8 +97,9 @@ class MarioState extends State
 		
 		world.setDebugDraw (debugDraw);
 		
-		createBox (0, 422, 4000, 10, false);
-		createBox (0, 100, 10, 10, true);
+		var floor:B2Body = createBox (0, 422, 4000, 10, false);
+		var leftWall:B2Body = createBox( 0, 322, 10, 200, false );
+		var rightWall:B2Body = createBox( 2000, 322, 10, 200, false );
 	}
 		
 	private function createBox (x:Float, y:Float, width:Float, height:Float, dynamicBody:Bool):B2Body {
@@ -107,9 +116,11 @@ class MarioState extends State
 		
 		var fixtureDefinition = new B2FixtureDef ();
 		fixtureDefinition.shape = polygon;
+		fixtureDefinition.userData = new String('wall');
 		
-		var body = MarioState.world.createBody (bodyDefinition);
+		var body:B2Body = MarioState.world.createBody (bodyDefinition);
 		body.createFixture (fixtureDefinition);
+		body.
 		
 		return body;
 	}
@@ -129,13 +140,13 @@ class MarioState extends State
 		
 		var moving:Bool = false;
 		
-		if ( inputKeys.get(Keyboard.RIGHT) == true )
+		if ( inputKeys.get(Keyboard.RIGHT) == true && mario.x < 2000 )
 		{
 			mario.moveRight();
 			moving = true;
 		}
 		
-		if ( inputKeys.get(Keyboard.LEFT) == true )
+		if ( inputKeys.get(Keyboard.LEFT) == true && mario.x > 0 )
 		{
 			mario.moveLeft();
 			moving = true;
@@ -150,6 +161,8 @@ class MarioState extends State
 		if ( !moving )
 			mario.stopMove();
 		
+		manageCollisions();
+			
 		moveCamera();
 		
 		world.step (1 / 30, 10, 10);
@@ -157,10 +170,25 @@ class MarioState extends State
 		world.drawDebugData();
 	}
 	
-	private function moveCamera()
+	private function manageCollisions()
 	{
-		level.x = -mario.x + 120;
-		level.y = -mario.y + 140;
+		
+		trace(mario.body.getContactList());
+		
+		if ( mario.body.getContactList() != null )
+		trace( mario.body.getContactList().contact.getFixtureA().getBody().getUserData() );
+		
+		
+		//trace( mario.body.getContactList().contact.getFixtureA().getBody().getUserData().type );
+		
+	}
+	
+	private function moveCamera()
+	{		
+		if ( (-mario.x) < -122 && (-mario.x) > - 1865 )
+			level.x = -mario.x + 120;
+		
+		level.y = -mario.y + 150;
 	}
 	
 }

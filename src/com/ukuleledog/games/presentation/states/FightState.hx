@@ -54,6 +54,7 @@ class FightState extends State
 	private var lifeCeles:Bitmap;
 	private var emptyLife:BitmapData;
 	
+	private var timerDialog:Timer;
 	private var timerTerra:Timer;
 	private var timerEdgar:Timer;
 	private var timerLocke:Timer;
@@ -87,6 +88,10 @@ class FightState extends State
 	private var spikyShell:SpikyShell;
 	private var fireball:Fireball;
 	private var stomp:Bitmap;
+	private var miss:Bitmap;
+	
+	private var dialogStep:UInt;
+	private var dialogBox:Bitmap;
 	
 	public function new() 
 	{
@@ -122,6 +127,13 @@ class FightState extends State
 		mario.y = 0;
 		timerMario = new Timer(7500);
 		timerMario.addEventListener( TimerEvent.TIMER, marioAttack );
+		var tempMiss:BitmapData = new BitmapData(15, 8, true);
+		tempMiss.copyPixels( tempData, new Rectangle(0, 450, 15, 8), new Point(0, 0) );
+		miss = new Bitmap( tempMiss );
+		miss.x = 41;
+		miss.y = 115;
+		miss.alpha = 0;
+		addChild( miss );
 				
 		terra = new Terra();
 		terra.x = 190;
@@ -278,12 +290,24 @@ class FightState extends State
 	{
 		musicChannel.removeEventListener( Event.SOUND_COMPLETE, introTwo );
 		
-		introTimer = new Timer(1000);
-		introTimer.addEventListener( TimerEvent.TIMER, introThree );
+		introTimer = new Timer(600);
+		introTimer.addEventListener( TimerEvent.TIMER, introTwoHalf );
 		introTimer.start();
 						
 		Actuate.tween( mario, 1.5, { y : 120 } ).ease(Bounce.easeOut);
+		
+	}
+	
+	private function introTwoHalf( e:TimerEvent )
+	{
+		introTimer.removeEventListener( TimerEvent.TIMER, introTwoHalf );
+		introTimer.stop();
+		introTimer = new Timer(400);
+		introTimer.addEventListener( TimerEvent.TIMER, introThree );
+		introTimer.start();
+		
 		Assets.getSound("snd/smb3_stomp.wav", true).play();
+		
 	}
 	
 	private function introThree( e:TimerEvent )
@@ -292,33 +316,85 @@ class FightState extends State
 		introTimer.stop();
 		introTimer = null;
 		
-		Actuate.tween( octo, 0.5, { alpha: 0 } ).onComplete(introFour);
-		Actuate.tween( ennemyName, 0.5, { alpha: 0 } );
+		Assets.getSound("snd/ff6/2DMonsterDeath.mp3",true).play();
+		
+		Actuate.tween( ennemyName, 0.5, { alpha: 0 } ).onComplete(function() {
+			removeChild(ennemyName);
+			var tempData:BitmapData = Assets.getBitmapData("img/ff6-sprite.png", true);
+			var tempEnnemy:BitmapData = new BitmapData(54, 8, true);
+			tempEnnemy.copyPixels( tempData, new Rectangle(40, 420, 54, 8), new Point(0, 0) );
+			ennemyName = new Bitmap(tempEnnemy);
+			ennemyName.x = 15;
+			ennemyName.y = 170;
+			ennemyName.alpha = 0;
+			addChild(ennemyName);
+			Actuate.tween( ennemyName, 0.5, { alpha: 1 } );
+		});
+		
+		Actuate.tween( octo, 1.2, { alpha: 0 } );
 		
 		mario.setAnimation('super-idle');		
+		
+		timerDialog = new Timer(3000);
+		timerDialog.addEventListener( TimerEvent.TIMER, introDialog );
+		timerDialog.start();
+		
+		Actuate.tween( tube, 2, { y:0 } );
+		
+	}
+	
+	private function introDialog( e:TimerEvent = null )
+	{		
+		
+		var tempData:BitmapData = Assets.getBitmapData("img/ff6-sprite.png", true);
+		var dialogData:BitmapData = new BitmapData(240, 22, false);
+		
+		switch ( dialogStep )
+		{
+			case 0:		
+				dialogData.copyPixels( tempData, new Rectangle(0,781,240,22), new Point(0, 0) );
+			case 1:
+				removeChild(dialogBox);
+				dialogData.copyPixels( tempData, new Rectangle(0, 803, 240, 22), new Point(0, 0) );
+			case 2:
+				removeChild(dialogBox);
+				dialogData.copyPixels( tempData, new Rectangle(0, 825, 240, 22), new Point(0, 0) );
+			case 3:
+				removeChild(dialogBox);
+				dialogData.copyPixels( tempData, new Rectangle(0, 847, 240, 22), new Point(0, 0) );
+			case 4:
+				removeChild(dialogBox);
+				dialogData.copyPixels( tempData, new Rectangle(0, 869, 240, 22), new Point(0, 0) );
+			case 5:
+				introFour();
+				timerDialog.removeEventListener( TimerEvent.TIMER, introDialog );
+				timerDialog.stop();
+				removeChild(dialogBox);
+				return;
+		}
+		
+		dialogBox = new Bitmap(dialogData);
+		dialogBox.y = 138;
+		dialogBox.x = 7;
+		addChild(dialogBox);
+		dialogStep++;
 		
 	}
 	
 	private function introFour()
 	{
-		Actuate.tween( tube, 2, { y:0 } );
 		musicChannel = Assets.getMusic("music/ff6.mp3").play();
 		
-		removeChild(ennemyName);
-		var tempData:BitmapData = Assets.getBitmapData("img/ff6-sprite.png", true);
-		var tempEnnemy:BitmapData = new BitmapData(54, 8, true);
-		tempEnnemy.copyPixels( tempData, new Rectangle(40, 420, 54, 8), new Point(0, 0) );
-		ennemyName = new Bitmap(tempEnnemy);
-		ennemyName.x = 15;
-		ennemyName.y = 170;
-		ennemyName.alpha = 0;
-		addChild(ennemyName);
-		Actuate.tween( ennemyName, 0.5, { alpha: 1 } );
-		
+		menuMain.alpha = 0;
+		cursor.alpha = 0;
 		addChild(menuMain);
 		addChild(cursor);
 		
-		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		Actuate.tween( menuMain, 1, { alpha:1 } );
+		Actuate.tween( cursor, 1, { alpha:1 } ).onComplete(function() {
+			stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		});
+		
 	}
 	
 	private function resetCursor()
@@ -342,6 +418,7 @@ class FightState extends State
 				{
 					cursorPosition = 1;
 					cursor.y = 179;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				} else if ( e.keyCode == Keyboard.SPACE )
 				{
 					removeChild(cursor);
@@ -350,16 +427,19 @@ class FightState extends State
 					cursor.y = 180;
 					cursor.x = 16;
 					addChild(cursor);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 1: // main f4
 				if ( e.keyCode == Keyboard.DOWN )
 				{
 					cursorPosition = 2;
 					cursor.y = 189;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				} else if ( e.keyCode == Keyboard.UP )
 				{
 					cursorPosition = 0;
 					cursor.y = 169;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				} else if ( e.keyCode == Keyboard.SPACE )
 				{
 					removeChild(cursor);
@@ -368,12 +448,14 @@ class FightState extends State
 					cursor.y = 180;
 					cursor.x = 16;
 					addChild(cursor);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 2: // main ubi
 				if ( e.keyCode == Keyboard.UP )
 				{
 					cursorPosition = 1;
 					cursor.y = 179;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				} else if ( e.keyCode == Keyboard.SPACE )
 				{
 					removeChild(cursor);
@@ -382,12 +464,14 @@ class FightState extends State
 					cursor.y = 180;
 					cursor.x = 16;
 					addChild(cursor);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 3: // prizee 1
 				if ( e.keyCode == Keyboard.DOWN )
 				{
 					cursorPosition = 4;
 					cursor.y = 200;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				} else if ( e.keyCode == Keyboard.ESCAPE )
 				{
 					removeChild(menuPrizee);
@@ -396,12 +480,14 @@ class FightState extends State
 				{
 					removeChild(menuPrizee);
 					attack(1);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 4: // prizee 2
 				if ( e.keyCode == Keyboard.UP )
 				{
 					cursorPosition = 3;
 					cursor.y = 180;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				} else if ( e.keyCode == Keyboard.ESCAPE )
 				{
 					removeChild(menuPrizee);
@@ -410,6 +496,7 @@ class FightState extends State
 				{
 					removeChild(menuPrizee);
 					attack(2);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 5: // f4 1
 				if  ( e.keyCode == Keyboard.ESCAPE )
@@ -420,12 +507,14 @@ class FightState extends State
 				{
 					removeChild(menuF4);
 					attack(3);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 6: // ubi 1
 				if  ( e.keyCode == Keyboard.DOWN )
 				{
 					cursorPosition = 7;
 					cursor.y = 195;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}  else if ( e.keyCode == Keyboard.ESCAPE )
 				{
 					removeChild(menuUbi);
@@ -434,16 +523,19 @@ class FightState extends State
 				{
 					removeChild(menuUbi);
 					attack(4);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 7: // ubi 2
 				if  ( e.keyCode == Keyboard.DOWN )
 				{
 					cursorPosition = 8;
 					cursor.y = 205;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}  else if  ( e.keyCode == Keyboard.UP )
 				{
 					cursorPosition = 6;
 					cursor.y = 180;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}  else if ( e.keyCode == Keyboard.ESCAPE )
 				{
 					removeChild(menuUbi);
@@ -452,12 +544,14 @@ class FightState extends State
 				{
 					removeChild(menuUbi);
 					attack(5);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			case 8: // ubi3
 				if  ( e.keyCode == Keyboard.UP )
 				{
 					cursorPosition = 7;
 					cursor.y = 195;
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}  else if ( e.keyCode == Keyboard.ESCAPE )
 				{
 					removeChild(menuUbi);
@@ -466,6 +560,7 @@ class FightState extends State
 				{
 					removeChild(menuUbi);
 					attack(6);
+					Assets.getSound("snd/ff6/1BItemMenuItng.mp3", true).play();
 				}
 			
 		}	
@@ -496,6 +591,8 @@ class FightState extends State
 			star.y = 0;
 			addChild( star );
 			
+			Assets.getSound("snd/ff6/02WhiteMagic.mp3").play();
+			
 			Actuate.tween( star, 0.5, {y:120} ).onComplete(
 				function() {
 					removeChild( star );
@@ -517,8 +614,10 @@ class FightState extends State
 			addChild(shell);
 			
 			terra.setAnimation('hurt');
+			Assets.getSound("snd/ff6/33HitFist.mp3", true).play();
 			
 			Actuate.tween(shell, 1, { y:70 } ).ease( Bounce.easeOut ).onComplete(function() {
+				Assets.getSound("snd/ff6/2DMonsterDeath.mp3").play();
 				removeChild(shell);
 				attackCount++;
 				var index:Int = getChildIndex(lifeTerra);
@@ -543,8 +642,10 @@ class FightState extends State
 			addChild(spikyShell);
 			
 			locke.setAnimation('hurt');
+			Assets.getSound("snd/ff6/33HitFist.mp3", true).play();
 			
 			Actuate.tween(spikyShell, 1, { y:90 } ).ease( Bounce.easeOut ).onComplete(function() {
+				Assets.getSound("snd/ff6/2DMonsterDeath.mp3").play();
 				removeChild(spikyShell);
 				attackCount++;
 				var index:Int = getChildIndex(lifeLocke);
@@ -569,8 +670,10 @@ class FightState extends State
 			addChild(fireball);
 			
 			celes.setAnimation('hurt');
+			Assets.getSound("snd/ff6/33HitFist.mp3", true).play();
 			
 			Actuate.tween(fireball, 1, { y:110 } ).onComplete(function() {
+				Assets.getSound("snd/ff6/2DMonsterDeath.mp3").play();
 				removeChild(fireball);
 				attackCount++;
 				var index:Int = getChildIndex(lifeCeles);
@@ -598,8 +701,10 @@ class FightState extends State
 			addChild(stomp);
 			
 			edgar.setAnimation('hurt');
+			Assets.getSound("snd/ff6/33HitFist.mp3", true).play();
 			
 			Actuate.tween(stomp, 1, { y:130 } ).ease( Bounce.easeOut ).onComplete(function() {
+				Assets.getSound("snd/ff6/2DMonsterDeath.mp3").play();
 				removeChild(stomp);
 				attackCount++;
 				var index:Int = getChildIndex(lifeEdgar);
@@ -663,11 +768,14 @@ class FightState extends State
 			terraAttackAnimation.y = 80;
 			addChild( terraAttackAnimation );
 			
+			Assets.getSound("snd/ff6/19Fire3.mp3", true).play();
+			
 		}
 	}
 	
 	private function terraAttackEnd( e:TimerEvent )
 	{		
+		displayMiss();
 		timerTerraAttack.removeEventListener( TimerEvent.TIMER, terraAttackEnd );
 		timerTerraAttack.stop();
 		timerTerraAttack = null;
@@ -705,6 +813,8 @@ class FightState extends State
 			timerEdgarAttack.addEventListener( TimerEvent.TIMER, edgarAttackEnd );
 			timerEdgarAttack.start();
 			
+			Assets.getSound("snd/ff6/4BDrill.mp3").play();
+			
 			Actuate.tween( edgar, 1, { x:40 } ).ease( Bounce.easeOut ).onComplete(function() {
 				Actuate.tween(edgar, 1, { x:185 } ).onComplete(function() {
 					edgar.x = 205;
@@ -716,6 +826,7 @@ class FightState extends State
 	
 	private function edgarAttackEnd( e:TimerEvent )
 	{
+		displayMiss();
 		timerEdgarAttack.removeEventListener( TimerEvent.TIMER, edgarAttackEnd );
 		timerEdgarAttack.stop();
 		timerEdgarAttack = null;
@@ -749,11 +860,14 @@ class FightState extends State
 			timerLockeAttack.start();
 			
 			lockAttackAnimation.alpha = 0.7;
+			
+			Assets.getSound("snd/ff6/37Ice2Part2.mp3", true).play();
 		}
 	}
 	
 	private function lockeAttackEnd( e:TimerEvent )
 	{
+		displayMiss();
 		timerLockeAttack.removeEventListener( TimerEvent.TIMER, lockeAttackEnd );
 		timerLockeAttack.stop();
 		timerLockeAttack = null;
@@ -786,11 +900,14 @@ class FightState extends State
 			timerCelesAttack = new Timer(2000);
 			timerCelesAttack.addEventListener( TimerEvent.TIMER, celesAttackEnd );
 			timerCelesAttack.start();
+			
+			Assets.getSound("snd/ff6/2ESwordSlashLong.mp3", true).play(0,5);
 		}
 	}
 	
 	private function celesAttackEnd( e:TimerEvent )
-	{
+	{		
+		displayMiss();
 		timerCelesAttack.removeEventListener( TimerEvent.TIMER, celesAttackEnd );
 		timerCelesAttack.stop();
 		timerCelesAttack = null;
@@ -798,6 +915,16 @@ class FightState extends State
 		celesLoadBar.scaleX = 0;
 		celes.setAnimation('idle');
 		startTimers();
+	}
+	
+	private function displayMiss()
+	{
+		miss.alpha = 1;
+		Assets.getSound("snd/ff6/A0BlockShield.mp3", true).play();
+		Actuate.tween( miss, 1, {y:108} ).onComplete(function() {
+			miss.alpha = 0;
+			miss.y = 115;
+		});
 	}
 	
 	private function endState()
@@ -824,11 +951,12 @@ class FightState extends State
 			octo.x = -30;
 			addChild(octo);
 			
+			Assets.getSound("snd/ff6/4EDeathSpell.mp3").play();
+			
 			mario.setAnimation('super-walk');
 			Actuate.tween(mario, 5, { x:340 } );
-			Actuate.tween(octo, 5, { x:280 } ).onComplete(function() {
-				Actuate.tween(musicChannel.soundTransform, 2, { volume:0 } );
-				Actuate.tween(screen, 5, { alpha:1 } ).onComplete(function() {
+			Actuate.tween(octo, 5, { x:270 } ).onComplete(function() {
+				Actuate.tween(screen, 2, { alpha:1 } ).onComplete(function() {
 					musicChannel.stop();
 					dispatchEvent(new Event(Event.COMPLETE));
 				});
