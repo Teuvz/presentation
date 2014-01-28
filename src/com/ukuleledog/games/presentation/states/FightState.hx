@@ -383,7 +383,7 @@ class FightState extends State
 	
 	private function introFour()
 	{
-		musicChannel = Assets.getMusic("music/ff6.mp3").play();
+		musicChannel = Assets.getSound("music/ff6.mp3").play();
 		
 		menuMain.alpha = 0;
 		cursor.alpha = 0;

@@ -79,7 +79,7 @@ class MapState extends State
 		help.y = 100;
 		addChild(help);
 		
-		musicChannel = Assets.getMusic("music/map.mp3").play();
+		musicChannel = Assets.getSound("music/map.mp3").play();
 		
 		Assets.getSound("snd/smb3_hammer_bros_shuffle.wav").play();
 		

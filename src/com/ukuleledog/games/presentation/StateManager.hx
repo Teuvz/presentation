@@ -1,9 +1,11 @@
 package com.ukuleledog.games.presentation;
 
 import com.ukuleledog.games.presentation.states.CodecState;
+import com.ukuleledog.games.presentation.states.EndingState;
 import com.ukuleledog.games.presentation.states.FightState;
 import com.ukuleledog.games.presentation.states.MapState;
 import com.ukuleledog.games.presentation.states.MarioState;
+import com.ukuleledog.games.presentation.states.SocialState;
 import com.ukuleledog.games.presentation.states.SplashState;
 import com.ukuleledog.games.presentation.states.State;
 import flash.display.Sprite;
@@ -37,7 +39,7 @@ class StateManager extends Sprite
 	{
 		removeEventListener( Event.ADDED_TO_STAGE, init );
 				
-		currentState = new MarioState();
+		currentState = new SocialState();
 		currentState.addEventListener(Event.COMPLETE, mapHandle);
 		addChild(currentState);
 	}
@@ -82,17 +84,29 @@ class StateManager extends Sprite
 		currentState = null;
 		
 		currentState = new CodecState();
-		currentState.addEventListener(Event.COMPLETE, personaHandle);
+		currentState.addEventListener(Event.COMPLETE, endingHandle);
 		addChild(currentState);
 	}
 	
-	private function personaHandle( e:Event )
+	private function endingHandle( e:Event )
 	{
-		currentState.removeEventListener(Event.COMPLETE, personaHandle);
+		currentState.removeEventListener(Event.COMPLETE, endingHandle);
 		removeChild(currentState);
 		currentState = null;
 		
-		trace("persona");
+		currentState = new EndingState();
+		currentState.addEventListener(Event.COMPLETE, socialHandle);
+		addChild(currentState);
+	}
+	
+	private function socialHandle( e:Event )
+	{
+		currentState.removeEventListener(Event.COMPLETE, socialHandle);
+		removeChild(currentState);
+		currentState = null;
+		
+		currentState = new SocialState();
+		addChild(currentState);
 	}
 	
 }

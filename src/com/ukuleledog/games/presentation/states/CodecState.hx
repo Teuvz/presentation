@@ -1,6 +1,7 @@
 package com.ukuleledog.games.presentation.states;
 import com.ukuleledog.games.presentation.core.AnimatedObject;
 import com.ukuleledog.games.presentation.elements.Cactus;
+import com.ukuleledog.games.presentation.elements.CodecBlock;
 import com.ukuleledog.games.presentation.elements.Hammer;
 import com.ukuleledog.games.presentation.elements.HelpCry;
 import com.ukuleledog.games.presentation.elements.MapMario;
@@ -34,11 +35,17 @@ class CodecState extends State
 	
 	private var soundChannel:SoundChannel;
 	private var startTimer:Timer;
+	private var codecTimer:Timer;
 	
 	private var background:Sprite;
 	
 	private var meiLing:MeiLing;
 	private var snake:Snake;
+	private var snakeMask:Sprite;
+	private var meiLingMask:Sprite;
+	
+	private var codecBlock:CodecBlock;
+	private var codecBlockAnimation:UInt = 6;
 	
 	private var textField:TextField;
 	private var textFormat:TextFormat;	
@@ -51,6 +58,7 @@ class CodecState extends State
 	private var cursorPosition:UInt = 0;
 	
 	private var step:UInt = 0;
+	private var stupidCount:UInt = 0;
 	
 	public function new() 
 	{
@@ -106,7 +114,58 @@ class CodecState extends State
 		snake.scaleY = 2.1;
 		snake.alpha = 0;
 		background.addChild( snake );
+		
+		snakeMask = new Sprite();
+		snakeMask.graphics.beginFill( 0x294539, 0.2 );
+		snakeMask.graphics.drawRect(0, 0, 50, 15);
+		snakeMask.graphics.endFill();
+		snakeMask.scaleY = 0;
+		snake.addChild(snakeMask);
+		
+		meiLingMask = new Sprite();
+		meiLingMask.graphics.beginFill( 0x294539, 0.2 );
+		meiLingMask.graphics.drawRect(0, 0, 50, 15);
+		meiLingMask.graphics.endFill();
+		meiLingMask.scaleY = 0;
+		meiLing.addChild(meiLingMask);
+		
+		codecBlock = new CodecBlock();
+		codecBlock.x = 240;
+		codecBlock.y = 100;
+		codecTimer = new Timer(500);
+		codecTimer.addEventListener( TimerEvent.TIMER, handleCodecBlock );
 
+	}
+	
+	private function loop( e:Event )
+	{
+		if ( snakeMask.y == 0 && snakeMask.scaleY < 1 )
+			snakeMask.scaleY += 0.05;
+		else if ( snakeMask.y >= 75 && snakeMask.scaleY > 0  )
+		{
+			snakeMask.y += 0.5;
+			snakeMask.scaleY -= 0.05;
+		}
+		else if ( snakeMask.y < 86 )
+			snakeMask.y += 0.5;
+		else
+		{
+			snakeMask.y = 0;
+		}
+		
+		if ( meiLingMask.y == 0 && meiLingMask.scaleY < 1 )
+			meiLingMask.scaleY += 0.05;
+		else if ( meiLingMask.y >= 75 && meiLingMask.scaleY > 0  )
+		{
+			meiLingMask.y += 0.5;
+			meiLingMask.scaleY -= 0.05;
+		}
+		else if ( snakeMask.y < 86 )
+			meiLingMask.y += 0.5;
+		else
+		{
+			meiLingMask.y = 0;
+		}
 	}
 	
 	private function codecOpen( e:Event )
@@ -122,8 +181,12 @@ class CodecState extends State
 	{
 		soundChannel.removeEventListener( Event.SOUND_COMPLETE, start );
 		
-		musicChannel = Assets.getMusic("music/codec.mp3").play();
+		musicChannel = Assets.getSound("music/codec.mp3").play();
 		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		
+		background.addChild( codecBlock );
+		codecTimer.start();
+		addEventListener( Event.ENTER_FRAME, loop );
 		
 		Actuate.tween( meiLing, 1, {alpha: 1} );
 		Actuate.tween( snake, 1, {alpha: 1} );
@@ -192,9 +255,33 @@ class CodecState extends State
 				displaySave();
 			} else if ( cursorPosition == 1 && e.keyCode == Keyboard.SPACE )
 			{
-				meiLing.setAnimation('talk');
-				displayText("Are you sure?");
-				displayingSave = false;
+				if ( stupidCount == 0 )
+				{
+					meiLing.setAnimation('talk');
+					displayText("Are you sure?");
+					displayingSave = false;
+				} else if ( stupidCount == 1 )
+				{
+					meiLing.setAnimation('talk');
+					displayText("C'mon Snake, you didn't call me for no reason.");
+					displayingSave = false;
+				} else if ( stupidCount == 2 )
+				{
+					meiLing.setAnimation('serious');
+					displayText("........");
+					displayingSave = false;
+				} else if ( stupidCount == 3 )
+				{
+					meiLing.setAnimation('pissed');
+					displayText("........");
+					displayingSave = false;
+				} else
+				{
+					meiLing.setAnimation('tongue');
+					displayText("");
+					displayingSave = false;
+				}
+				stupidCount++;
 			} else if ( cursorPosition == 0 && e.keyCode == Keyboard.SPACE )
 			{
 				meiLing.setAnimation('talk');
@@ -220,7 +307,7 @@ class CodecState extends State
 					displayText("He's written video game reviews for several french magazines and has been published in Flash&Flex in the US, talking about the HAXE programming language.");
 					step = 4;
 				case 4:
-					displayText("But he doesn't only work on video games, he helped out the symphonic metal band Adrana write their first album and help direct a short film that was presented to Quentin Tarantino himself.");
+					displayText("But he doesn't only work on video games, he helped out the symphonic metal band Adrana write their first album and help create a short film that was presented to Quentin Tarantino himself.");
 					step = 5;
 				case 5:
 					displayText("He's also not only co-writter but a recuring character in the online comic 'Hola Tavernier!'");
@@ -243,8 +330,13 @@ class CodecState extends State
 					meiLing.setAnimation('talk');
 					snake.setAnimation('idle');
 					displayText("Oh look! Here he is!");
-					marioAnimation();
 					step = 10;
+				case 10:
+					marioAnimation();
+					step = 11;
+				case 11:
+					endAnimation();
+					step = 12;
 			}
 		}
 		
@@ -252,8 +344,7 @@ class CodecState extends State
 	
 	private function marioAnimation()
 	{
-		
-		stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		stage.removeEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
 		meiLing.setAnimation('idle');
 		
 		var tempData:BitmapData = Assets.getBitmapData("img/ff6-sprite.png", true);
@@ -274,18 +365,30 @@ class CodecState extends State
 		addChild(mario);
 		mario.setAnimation('super-walk');
 		
-		Actuate.tween(mario, 8, { x:720 } );
-		Actuate.tween(octo, 8, { x:570 } ).onComplete(function() {
-			Actuate.tween(textField, 0.2, { alpha:0 } );
+		displayText("");
+		Assets.getSound('snd/ff6/4EDeathSpell.mp3').play();
+		Actuate.tween(mario, 6, { x:720 } );
+		Actuate.tween(octo, 6, { x:570 } ).onComplete(function() {
+			displayText("........");
+			stage.addEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		});
+		
+	}
+	
+	private function endAnimation()
+	{
+		removeEventListener( Event.ENTER_FRAME, loop );
+		stage.removeEventListener( KeyboardEvent.KEY_DOWN, keyDownHandle );
+		
+		Actuate.tween(textField, 0.2, { alpha:0 } );
 			Actuate.tween(meiLing, 1, { alpha:0 } );
 			Actuate.tween(snake, 1, { alpha:0 } ).onComplete(function() {
-				Actuate.tween( background, 1, { alpha:0 } ).onComplete(function(){
-					musicChannel.stop();
+				Actuate.tween( background, 1, { alpha:0 } ).onComplete(function() {
+					if ( musicChannel != null)
+						musicChannel.stop();
 					dispatchEvent(new Event(Event.COMPLETE));
 				});
 			});
-		});
-		
 	}
 	
 	private function displaySave()
@@ -299,6 +402,17 @@ class CodecState extends State
 		textField.setTextFormat(textFormat, 3, 7);
 		else
 		textField.setTextFormat(textFormat, 11, 22);
+	}
+	
+	private function handleCodecBlock( e:TimerEvent ) 
+	{		
+		var rand:Int = Math.ceil( Math.random() * 3 );
+	
+		if ( rand == 1 && codecBlockAnimation > 1 )
+			codecBlock.setAnimation( Std.string(--codecBlockAnimation) );
+		else if ( rand == 3 && codecBlockAnimation < 8 )
+			codecBlock.setAnimation( Std.string(++codecBlockAnimation) );
+		
 	}
 	
 }

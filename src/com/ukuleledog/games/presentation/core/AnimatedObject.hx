@@ -16,11 +16,9 @@ import openfl.Assets;
  */
 class AnimatedObject extends GameObject
 {
-
-	private var looping:Bool = true;
 	
 	private var animationTimer:Timer;
-	private var currentAnimation:String;
+	public var currentAnimation:String;
 	private var currentFrame:UInt = 0;
 	private var animationPositionsX:Map<String,UInt>;
 	private var animationPositionsY:Map<String,UInt>;
@@ -28,6 +26,7 @@ class AnimatedObject extends GameObject
 	private var animationHeights:Map<String,UInt>;
 	private var animationWidths:Map<String,UInt>;
 	private var animationSpeeds:Map<String,Float>;
+	private var animationLooping:Map<String,Bool>;
 	
 	private var currentAnimationX:UInt = 0;
 	private var currentAnimationY:UInt = 0;
@@ -35,6 +34,7 @@ class AnimatedObject extends GameObject
 	private var currentAnimationHeight:UInt = 0;
 	private var currentAnimationWidth:UInt = 0;
 	private var currentAnimationSpeed:Float = 0;
+	private var currentAnimationLoop:Bool = true;
 	
 	public function new() 
 	{
@@ -45,6 +45,7 @@ class AnimatedObject extends GameObject
 		animationPositionsY = new Map();
 		animationWidths = new Map();
 		animationSpeeds = new Map();
+		animationLooping = new Map();
 		
 		addEventListener(Event.REMOVED_FROM_STAGE, kill);
 		
@@ -69,10 +70,16 @@ class AnimatedObject extends GameObject
 		currentAnimationHeight = animationHeights.get(name);
 		currentAnimationWidth = animationWidths.get(name);
 		currentAnimationSpeed = animationSpeeds.get(name);
+		currentAnimationLoop = animationLooping.get(name);
 		
-		animationTimer = new Timer(currentAnimationSpeed);
-		animationTimer.addEventListener( TimerEvent.TIMER, animationLoop );
-		animationTimer.start();
+		if ( currentAnimationLength > 1 )
+		{
+		
+			animationTimer = new Timer(currentAnimationSpeed);
+			animationTimer.addEventListener( TimerEvent.TIMER, animationLoop );
+			animationTimer.start();
+		
+		}
 		
 		animationLoop();
 	}
@@ -85,8 +92,7 @@ class AnimatedObject extends GameObject
 		animationPositionsX.set(name, startX);
 		animationPositionsY.set(name, startY);
 		animationSpeeds.set(name, speed * 1000);
-		
-		this.looping = looping;
+		animationLooping.set(name, looping);
 	}
 	
 	public function animate( name:String = 'idle' )
@@ -107,15 +113,24 @@ class AnimatedObject extends GameObject
 				
 		if ( currentFrame+1 < currentAnimationLength )
 			currentFrame++;
-		else if ( looping )
+		else if ( currentAnimationLoop )
 			currentFrame = 0;
+		else
+		{
+			animationTimer.removeEventListener( TimerEvent.TIMER, animationLoop );
+		}
 	}
 		
 	private function kill( e:Event )
 	{
 		removeEventListener(Event.REMOVED_FROM_STAGE, kill);
-		animationTimer.stop();
-		animationTimer = null;
+		
+		if ( currentAnimationLength >= 1 && animationTimer != null )
+		{
+			animationTimer.removeEventListener( TimerEvent.TIMER, animationLoop );
+			animationTimer.stop();
+			animationTimer = null;
+		}
 	}
 	
 }

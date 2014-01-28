@@ -1,21 +1,16 @@
 package com.ukuleledog.games.presentation.elements;
 
 import com.ukuleledog.games.presentation.core.AnimatedObject;
-
-import flash.display.Bitmap;
-import openfl.Assets;
 import flash.events.Event;
-import box2D.common.math.B2Vec2;
+import openfl.Assets;
 
 /**
  * ...
  * @author Matt
  */
-class ItemBox extends AnimatedObject
+class LanguageText extends AnimatedObject
 {
 
-	private var status:String = 'full';
-	
 	public function new() 
 	{
 		super();
@@ -25,24 +20,13 @@ class ItemBox extends AnimatedObject
 	
 	private function init( e:Event )
 	{
-		createAnimation('idle', 16, 176, 4, 16, 16, 0.2);
-		createAnimation('empty', 0, 176, 1, 16, 16);
+		createAnimation('idle', 0, 741, 1, 8, 108);
+		createAnimation('java', 0, 749, 1, 8, 108);
+		createAnimation('as3', 0, 757, 1, 8, 108);
+		createAnimation('csharp', 0, 765, 1, 8, 108);
 		animate();
 		
 		removeEventListener( Event.ADDED_TO_STAGE, init );
-	}
-	
-	public function empty() : Bool
-	{
-		if ( status == 'full' )
-			return false;
-		return true;
-	}
-	
-	public function hit()
-	{
-		status = 'empty';
-		setAnimation('empty');
 	}
 	
 }

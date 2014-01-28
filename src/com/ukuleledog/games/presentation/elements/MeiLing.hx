@@ -23,6 +23,9 @@ class MeiLing extends AnimatedObject
 		createAnimation('idle', 0, 480, 3, 87, 50, 0.2);
 		createAnimation('talk', 0, 568, 2, 87, 50, 0.2);
 		createAnimation('wink', 100, 568, 1, 87, 50);
+		createAnimation('serious', 150, 568, 1, 87, 50);
+		createAnimation('pissed', 200, 568, 2, 87, 50, 0.5);
+		createAnimation('tongue', 300, 568, 1, 87, 50);
 		animate();
 		
 		removeEventListener( Event.ADDED_TO_STAGE, init );

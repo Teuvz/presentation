@@ -11,7 +11,7 @@ import box2D.common.math.B2Vec2;
  * ...
  * @author Matt
  */
-class ItemBox extends AnimatedObject
+class MarioNumber extends AnimatedObject
 {
 
 	private var status:String = 'full';
@@ -25,8 +25,17 @@ class ItemBox extends AnimatedObject
 	
 	private function init( e:Event )
 	{
-		createAnimation('idle', 16, 176, 4, 16, 16, 0.2);
-		createAnimation('empty', 0, 176, 1, 16, 16);
+		createAnimation('idle', 0, 734, 1, 8, 8);
+		createAnimation('0', 0, 734, 1, 8, 8);
+		createAnimation('1', 8, 734, 1, 8, 8);
+		createAnimation('2', 14, 734, 1, 8, 8);
+		createAnimation('3', 22, 734, 1, 8, 8);
+		createAnimation('4', 30, 734, 1, 8, 8);
+		createAnimation('5', 38, 734, 1, 8, 8);
+		createAnimation('6', 46, 734, 1, 8, 8);
+		createAnimation('7', 54, 734, 1, 8, 8);
+		createAnimation('8', 62, 734, 1, 8, 8);
+		createAnimation('9', 70, 734, 1, 8, 8);
 		animate();
 		
 		removeEventListener( Event.ADDED_TO_STAGE, init );
